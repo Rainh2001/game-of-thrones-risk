@@ -1,9 +1,24 @@
+import { User } from "@prisma/client";
+import users, { BaseUser } from "../mockObjects/users";
 import prisma from "../utils/prisma";
 
-async function main() {
-  await seed();
+const generateUsers = async (userList: Omit<User, 'id'>[]): Promise<void> => {
+  prisma.user.createMany({
+    data: userList,
+    skipDuplicates: true
+  });
 }
 
 async function seed() {
-  prisma.$connect();
+  await prisma.$connect();
+  await generateUsers(users);
 }
+
+seed()
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
+  })
